@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FGS.Store</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sky: #0099ff; --sky2: #00ccff; --dark: #0a0a0f;
+      --card: #0f1a26; --border: #1a3050; --text: #cdd9e5; --muted: #4a6a8a;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Rajdhani', sans-serif; background: var(--dark); color: #fff; min-height: 100vh; }
+    ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-thumb { background: var(--sky); border-radius: 4px; }
+
+    /* HEADER */
+    header {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(10,10,15,0.96); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; height: 62px;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; cursor: pointer; text-decoration: none; }
+    .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg,#0099ff,#0044aa); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron',monospace; font-weight: 900; font-size: 15px; color: #fff; }
+    .logo-text { font-family: 'Orbitron', monospace; font-weight: 900; font-size: 19px; letter-spacing: 2px; background: linear-gradient(90deg,#0099ff,#66ccff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    nav { display: flex; gap: 2px; }
+    .nav-link { padding: 8px 14px; border-radius: 7px; font-size: 14px; font-weight: 600; letter-spacing: 1px; color: #aaa; cursor: pointer; transition: all .2s; border: none; background: none; font-family: 'Rajdhani',sans-serif; }
+    .nav-link:hover, .nav-link.active { color: var(--sky); background: rgba(0,153,255,.1); }
+    .header-cta { background: linear-gradient(90deg,#0077cc,#0099ff); color: #fff; border: none; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; letter-spacing: 1px; cursor: pointer; font-family: 'Rajdhani',sans-serif; transition: all .2s; }
+    .header-cta:hover { transform: scale(1.05); box-shadow: 0 0 16px rgba(0,153,255,.45); }
+    .hamburger { display: none; background: none; border: 1px solid var(--border); color: #aaa; padding: 6px 10px; border-radius: 7px; cursor: pointer; font-size: 18px; }
+
+    /* SECTIONS */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* HERO */
+    .hero { position: relative; overflow: hidden; padding: 90px 32px 70px; text-align: center; }
+    .hero-glow { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% -10%, rgba(0,100,200,.2) 0%, transparent 65%); pointer-events: none; }
+    .hero-badge { display: inline-block; background: rgba(0,153,255,.12); border: 1px solid rgba(0,153,255,.3); border-radius: 20px; padding: 4px 16px; font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--sky); margin-bottom: 22px; }
+    .hero-title { font-family: 'Orbitron', monospace; font-weight: 900; font-size: clamp(34px,6vw,70px); line-height: 1.1; letter-spacing: 3px; margin-bottom: 18px; }
+    .hero-title .w { background: linear-gradient(90deg,#fff,#ccc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-title .b { background: linear-gradient(90deg,#0099ff,#00ccff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-sub { color: var(--muted); font-size: 17px; max-width: 540px; margin: 0 auto 38px; line-height: 1.75; }
+    .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .stats { display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; padding: 10px 32px 70px; }
+    .stat { text-align: center; }
+    .stat-num { font-family: 'Orbitron', monospace; font-size: 38px; font-weight: 900; color: var(--sky); }
+    .stat-label { color: var(--muted); font-size: 12px; letter-spacing: 1px; margin-top: 2px; }
+
+    /* CARDS */
+    .page-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; padding: 44px 32px 28px; }
+    .section-title { font-family: 'Orbitron', monospace; font-size: clamp(20px,4vw,30px); font-weight: 900; letter-spacing: 2px; background: linear-gradient(90deg,#0099ff,#fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .search-bar { background: #0d1b2a; border: 1px solid var(--border); color: #fff; padding: 10px 18px; border-radius: 28px; font-size: 14px; font-family: 'Rajdhani',sans-serif; outline: none; width: 100%; max-width: 380px; transition: border .2s; }
+    .search-bar:focus { border-color: var(--sky); }
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px,1fr)); gap: 22px; padding: 0 32px 60px; }
+    .card { background: linear-gradient(135deg,#0f1a26 60%,#0a1322); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: transform .22s, box-shadow .22s, border-color .22s; }
+    .card:hover { transform: translateY(-6px); box-shadow: 0 18px 42px rgba(0,153,255,.16); border-color: var(--sky); }
+    .card-img { width: 100%; height: 195px; object-fit: cover; display: block; transition: transform .4s; }
+    .card:hover .card-img { transform: scale(1.04); }
+    .card-img-wrap { overflow: hidden; position: relative; }
+    .card-badges { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 1px; }
+    .badge-free { background: rgba(0,200,0,.14); color: #00cc00; border: 1px solid #009900; }
+    .badge-paid { background: rgba(255,60,0,.14); color: #ff5500; border: 1px solid #cc3300; }
+    .badge-type { background: rgba(0,0,0,.6); color: #aaa; border: 1px solid #222; font-size: 10px; }
+    .card-body { padding: 16px 16px 18px; }
+    .card-cat { font-size: 10px; color: var(--sky); letter-spacing: 2px; font-weight: 700; margin-bottom: 5px; }
+    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 7px; color: #fff; line-height: 1.3; }
+    .card-desc { font-size: 12px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
+    .card-actions { display: flex; gap: 8px; }
+
+    /* BUTTONS */
+    .btn { border: none; padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; letter-spacing: 1px; cursor: pointer; font-family: 'Rajdhani',sans-serif; transition: all .2s; flex: 1; }
+    .btn-blue { background: linear-gradient(90deg,#0077cc,#0099ff); color: #fff; }
+    .btn-blue:hover { transform: scale(1.05); box-shadow: 0 0 16px rgba(0,153,255,.5); }
+    .btn-green { background: linear-gradient(90deg,#005c00,#00aa00); color: #fff; }
+    .btn-green:hover { transform: scale(1.05); box-shadow: 0 0 16px rgba(0,200,0,.4); }
+    .btn-wa { background: linear-gradient(90deg,#075e54,#25d366); color: #fff; }
+    .btn-wa:hover { transform: scale(1.05); box-shadow: 0 0 16px rgba(37,211,102,.5); }
+    .btn-red { background: linear-gradient(90deg,#cc2200,#ff3300); color: #fff; flex: 0; padding: 10px 13px; }
+    .btn-red:hover { transform: scale(1.05); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: #aaa; }
+    .btn-outline:hover { border-color: var(--sky); color: var(--sky); }
+    .btn-hero { padding: 13px 30px; border-radius: 9px; font-size: 15px; }
+    .empty-state { grid-column: 1/-1; color: var(--muted); text-align: center; padding: 60px 0; font-size: 16px; }
+
+    /* ABOUT / CONTACT */
+    .info-page { max-width: 680px; margin: 0 auto; padding: 70px 32px; text-align: center; }
+    .info-page p { color: var(--text); font-size: 16px; line-height: 1.8; margin-bottom: 32px; }
+    .contact-card { background: #0f1a26; border: 1px solid var(--border); border-radius: 14px; padding: 36px; margin-top: 20px; }
+    .contact-num { color: var(--sky); font-size: 24px; font-weight: 700; margin: 8px 0 22px; }
+
+    /* ADMIN FAB */
+    #adminFab { position: fixed; bottom: 28px; left: 28px; width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg,#0077cc,#0044aa); color: #fff; border: none; font-size: 20px; cursor: pointer; box-shadow: 0 4px 20px rgba(0,100,200,.5); z-index: 400; transition: transform .2s; }
+    #adminFab:hover { transform: scale(1.12); }
+
+    /* MODAL */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.88); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
+    .overlay.show { display: flex; }
+    .modal { background: #0d1b2a; border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 100%; max-width: 500px; max-height: 92vh; overflow-y: auto; position: relative; }
+    .modal h3 { font-family: 'Orbitron', monospace; font-size: 17px; color: var(--sky); margin-bottom: 20px; }
+    .modal-close { position: absolute; top: 14px; right: 18px; background: none; border: none; color: #555; font-size: 24px; cursor: pointer; line-height: 1; }
+    .modal-close:hover { color: #fff; }
+    .field { margin-bottom: 13px; }
+    .field label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 5px; font-weight: 600; letter-spacing: 1px; }
+    .input { background: #091521; border: 1px solid var(--border); color: #fff; padding: 10px 13px; border-radius: 8px; font-size: 14px; width: 100%; font-family: 'Rajdhani',sans-serif; outline: none; transition: border .2s; }
+    .input:focus { border-color: var(--sky); }
+    textarea.input { resize: vertical; min-height: 70px; }
+    .upload-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 18px; text-align: center; cursor: pointer; transition: border .2s; color: var(--muted); font-size: 13px; }
+    .upload-zone:hover { border-color: var(--sky); color: var(--sky); }
+    .upload-zone img { width: 100%; max-height: 140px; object-fit: cover; border-radius: 7px; }
+    .type-btns { display: flex; gap: 10px; }
+    .type-btn { flex: 1; padding: 10px; border-radius: 8px; border: 2px solid var(--border); background: transparent; color: #aaa; cursor: pointer; font-weight: 700; font-family: 'Rajdhani',sans-serif; font-size: 14px; transition: all .2s; }
+    .type-btn.sel-free { border-color: #009900; background: rgba(0,200,0,.1); color: #00cc00; }
+    .type-btn.sel-paid { border-color: #cc3300; background: rgba(200,50,0,.1); color: #ff5500; }
+    .info-box { background: rgba(255,80,0,.07); border: 1px solid rgba(255,80,0,.22); border-radius: 8px; padding: 10px 13px; font-size: 12px; color: #ff9966; margin-bottom: 8px; }
+    .info-box-blue { background: rgba(0,153,255,.07); border: 1px solid rgba(0,153,255,.22); border-radius: 8px; padding: 10px 13px; font-size: 12px; color: #66bbff; margin-bottom: 8px; }
+    .err { color: #ff4444; font-size: 12px; margin-top: -6px; margin-bottom: 8px; }
+    .row2 { display: flex; gap: 10px; }
+    .auth-row { display: flex; gap: 10px; }
+    .admin-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+    .admin-big-btn { padding: 16px; border-radius: 10px; font-size: 15px; border: none; color: #fff; cursor: pointer; font-family: 'Rajdhani',sans-serif; font-weight: 700; letter-spacing: 1px; transition: all .2s; }
+    .admin-big-btn:hover { transform: scale(1.03); }
+
+    /* TOAST */
+    #toast { position: fixed; bottom: 28px; right: 28px; background: #0d1b2a; border: 1px solid var(--sky); color: #fff; padding: 13px 22px; border-radius: 10px; font-size: 14px; font-weight: 600; z-index: 9999; display: none; animation: fadeUp .3s; }
+    #toast.err-toast { border-color: #ff3300; }
+    @keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
+
+    /* MOBILE */
+    @media (max-width: 700px) {
+      nav { display: none; }
+      nav.mob-open { display: flex; flex-direction: column; position: absolute; top: 62px; left: 0; right: 0; background: rgba(10,10,15,.98); border-bottom: 1px solid var(--border); padding: 10px 20px; z-index: 300; }
+      .hamburger { display: block; }
+      .header-cta { display: none; }
+      .cards-grid { grid-template-columns: 1fr; padding: 0 16px 50px; }
+      .page-header { padding: 30px 16px 20px; }
+      .hero { padding: 60px 16px 40px; }
+      .stats { gap: 24px; }
+      .info-page { padding: 50px 16px; }
+      .row2 { flex-direction: column; }
+      .admin-btns { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a class="logo" onclick="showSection('home')">
+    <div class="logo-icon">F</div>
+    <span class="logo-text">FGS.Store</span>
+  </a>
+  <nav id="mainNav">
+    <button class="nav-link active" onclick="showSection('home')">Home</button>
+    <button class="nav-link" onclick="showSection('designs')">Designs</button>
+    <button class="nav-link" onclick="showSection('models')">3D Models</button>
+    <button class="nav-link" onclick="showSection('about')">About</button>
+    <button class="nav-link" onclick="showSection('contact')">Contact</button>
+  </nav>
+  <button class="header-cta" onclick="showSection('designs')">Browse Designs</button>
+  <button class="hamburger" onclick="toggleMob()">☰</button>
+</header>
+
+<!-- SECTIONS -->
+
+<!-- HOME -->
+<section id="sec-home" class="section active">
+  <div class="hero">
+    <div class="hero-glow"></div>
+    <div style="position:relative;z-index:1">
+      <div class="hero-badge">DESIGN · 3D · CREATIVE</div>
+      <h1 class="hero-title">
+        <span class="w">FGS_</span><span class="b">STORE</span>
+      </h1>
+      <p class="hero-sub">Premium Canva templates & 3D models crafted for creators, brands, and game developers.</p>
+      <div class="hero-btns">
+        <button class="btn btn-blue btn-hero" onclick="showSection('designs')">Browse Designs</button>
+        <button class="btn btn-green btn-hero" onclick="showSection('models')">Explore 3D Models</button>
+      </div>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="stat-designs">0</div><div class="stat-label">CANVA DESIGNS</div></div>
+    <div class="stat"><div class="stat-num" id="stat-models">0</div><div class="stat-label">3D MODELS</div></div>
+    <div class="stat"><div class="stat-num" id="stat-free">0</div><div class="stat-label">FREE DOWNLOADS</div></div>
+  </div>
+  <div style="padding:0 32px">
+    <div class="section-title" style="margin-bottom:24px">Featured Items</div>
+    <div class="cards-grid" id="featured-grid" style="padding:0 0 60px"></div>
+  </div>
+</section>
+
+<!-- DESIGNS -->
+<section id="sec-designs" class="section">
+  <div class="page-header">
+    <div class="section-title">Canva Designs</div>
+    <input class="search-bar" id="search-designs" placeholder="🔍 Search designs..." oninput="renderDesigns()" />
+  </div>
+  <div class="cards-grid" id="designs-grid"></div>
+</section>
+
+<!-- MODELS -->
+<section id="sec-models" class="section">
+  <div class="page-header">
+    <div class="section-title">3D Models</div>
+    <input class="search-bar" id="search-models" placeholder="🔍 Search models..." oninput="renderModels()" />
+  </div>
+  <div class="cards-grid" id="models-grid"></div>
+</section>
+
+<!-- ABOUT -->
+<section id="sec-about" class="section">
+  <div class="info-page">
+    <div class="section-title" style="margin-bottom:22px">About FGS.Store</div>
+    <p>FGS.Store is a creative studio specializing in premium Canva design templates and high-quality 3D models. We serve freelancers, game developers, content creators, and brands looking for professional-grade digital assets. All designs are crafted with attention to detail and are ready to use instantly.</p>
+    <button class="btn btn-wa" style="max-width:260px;margin:0 auto;display:block;padding:13px 0" onclick="openWA('FGS.Store')">💬 Chat on WhatsApp</button>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="sec-contact" class="section">
+  <div class="info-page">
+    <div class="section-title" style="margin-bottom:22px">Contact Us</div>
+    <p>For orders, custom designs, or any queries — reach us directly on WhatsApp.</p>
+    <div class="contact-card">
+      <div style="font-size:44px;margin-bottom:10px">💬</div>
+      <p style="color:#ccc;font-size:16px;margin-bottom:4px">WhatsApp</p>
+      <div class="contact-num">+91 9057800393</div>
+      <button class="btn btn-wa" onclick="openWA('FGS.Store')" style="max-width:240px;margin:0 auto;display:block;padding:12px 0;font-size:15px">Open WhatsApp Chat</button>
+    </div>
+  </div>
+</section>
+
+<!-- ADMIN FAB -->
+<button id="adminFab" onclick="openAdmin()" title="Admin Panel">⚙️</button>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ADMIN MODAL -->
+<div class="overlay" id="adminOverlay" onclick="closeOverlay('adminOverlay')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeOverlay('adminOverlay')">×</button>
+    <h3>⚙️ Admin Panel</h3>
+    <div id="admin-login">
+      <p style="color:var(--muted);font-size:13px;margin-bottom:14px">Enter admin password to manage uploads.</p>
+      <div class="field"><label>Password</label><input class="input" type="password" id="adminPwd" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()" /></div>
+      <div class="err" id="loginErr"></div>
+      <button class="btn btn-blue" style="width:100%;margin-top:4px" onclick="doLogin()">Login</button>
+    </div>
+    <div id="admin-panel" style="display:none">
+      <p style="color:#00cc00;font-size:13px;margin-bottom:18px">✅ Logged in as Admin</p>
+      <div class="admin-btns">
+        <button class="admin-big-btn" style="background:linear-gradient(135deg,#0077cc,#0099ff)" onclick="openUpload('design')">📐 Upload Design</button>
+        <button class="admin-big-btn" style="background:linear-gradient(135deg,#005c00,#00aa00)" onclick="openUpload('model')">🧊 Upload 3D Model</button>
+      </div>
+      <button class="btn btn-outline" onclick="doLogout()" style="width:100%;font-size:13px">Logout</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="overlay" id="uploadOverlay" onclick="closeOverlay('uploadOverlay')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeOverlay('uploadOverlay')">×</button>
+    <h3 id="upload-title">Upload</h3>
+
+    <!-- Preview Image -->
+    <div class="field">
+      <label>Preview Image * (.png or .jpg)</label>
+      <div class="upload-zone" id="imgZone" onclick="document.getElementById('imgInput').click()">
+        <div id="imgPlaceholder">📷 Click to upload image</div>
+      </div>
+      <input type="file" id="imgInput" accept=".png,.jpg,.jpeg" style="display:none" onchange="handleImg(this)" />
+    </div>
+
+    <!-- Title -->
+    <div class="field"><label>Title *</label><input class="input" id="up-title" placeholder="e.g. Business Card Template" /></div>
+
+    <!-- Category & Desc -->
+    <div class="row2">
+      <div class="field" style="flex:1"><label>Category *</label><input class="input" id="up-cat" placeholder="e.g. Social Media" /></div>
+    </div>
+    <div class="field"><label>Description *</label><textarea class="input" id="up-desc" placeholder="Short description..."></textarea></div>
+
+    <!-- Price (only for model) -->
+    <div id="price-row" class="field" style="display:none">
+      <label>Model Type *</label>
+      <div class="type-btns">
+        <button class="type-btn sel-free" id="btn-free" onclick="setPrice('Free')">🆓 Free</button>
+        <button class="type-btn" id="btn-paid" onclick="setPrice('Paid')">💰 Paid</button>
+      </div>
+    </div>
+
+    <!-- Model file (only for free model) -->
+    <div id="file-row" class="field" style="display:none">
+      <label>Model File * (.fbx, .glb or .zip)</label>
+      <div class="upload-zone" id="fileZone" onclick="document.getElementById('fileInput').click()">
+        <div id="filePlaceholder">📦 Click to upload model file</div>
+      </div>
+      <input type="file" id="fileInput" accept=".fbx,.glb,.zip" style="display:none" onchange="handleFile(this)" />
+    </div>
+
+    <!-- Info boxes -->
+    <div id="info-design" class="info-box" style="display:none">💡 All Canva designs are <strong>Paid</strong> — Buy button will open WhatsApp.</div>
+    <div id="info-paid" class="info-box" style="display:none">💡 Paid model shows a <strong>Buy</strong> button → redirects to your WhatsApp.</div>
+
+    <div class="err" id="uploadErr"></div>
+
+    <div class="row2" style="margin-top:8px">
+      <button class="btn btn-blue" onclick="doPublish()">🚀 Publish</button>
+      <button class="btn btn-outline" onclick="closeOverlay('uploadOverlay')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const WA = "919057800393";
+const PWD = "fgs2024";
+
+let items = [];
+let currentUploadType = "design";
+let currentPrice = "Free";
+let imgDataUrl = null;
+let fileBlob = null;
+let fileName = "";
+let adminLoggedIn = false;
+
+// ── SAMPLE DATA ──
+const samples = [
+  { id:"d1", type:"design", title:"Modern Business Card", category:"Business", description:"Clean minimal business card template with elegant typography.", price:"Paid", img:"https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=400&h=300&fit=crop", fileUrl:null, fileFormat:"", fileName:"" },
+  { id:"d2", type:"design", title:"Instagram Post Bundle", category:"Social Media", description:"10 stunning Instagram post templates for brands.", price:"Paid", img:"https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=300&fit=crop", fileUrl:null, fileFormat:"", fileName:"" },
+  { id:"d3", type:"design", title:"YouTube Thumbnail Pack", category:"Social Media", description:"Eye-catching YouTube thumbnail templates.", price:"Paid", img:"https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=300&fit=crop", fileUrl:null, fileFormat:"", fileName:"" },
+  { id:"m1", type:"model", title:"Low Poly Tree", category:"Nature", description:"Stylized low-poly tree. Great for games.", price:"Free", img:"https://images.unsplash.com/photo-1542401886-65d6c61db217?w=400&h=300&fit=crop", fileUrl:null, fileFormat:".glb", fileName:"low_poly_tree.glb" },
+  { id:"m2", type:"model", title:"Sci-Fi Weapon", category:"Weapons", description:"High-detail sci-fi blaster model for games.", price:"Paid", img:"https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop", fileUrl:null, fileFormat:".fbx", fileName:"" },
+  { id:"m3", type:"model", title:"Wooden Crate", category:"Props", description:"Classic wooden crate with PBR textures.", price:"Free", img:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop", fileUrl:null, fileFormat:".zip", fileName:"wooden_crate.zip" },
+];
+
+function loadItems() {
+  try { const s = localStorage.getItem("fgs_items"); items = s ? JSON.parse(s) : [...samples]; }
+  catch { items = [...samples]; }
+}
+function saveItems() { try { localStorage.setItem("fgs_items", JSON.stringify(items)); } catch {} }
+
+// ── NAVIGATION ──
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => { if(l.textContent.toLowerCase().includes(id==='home'?'home':id)) l.classList.add('active'); });
+  if (id === 'home') renderHome();
+  if (id === 'designs') renderDesigns();
+  if (id === 'models') renderModels();
+  document.getElementById('mainNav').classList.remove('mob-open');
+  window.scrollTo(0,0);
+}
+function toggleMob() { document.getElementById('mainNav').classList.toggle('mob-open'); }
+
+// ── WA ──
+function openWA(name, type) {
+  const t = type || "item";
+  const msg = encodeURIComponent(`Hi! I'm interested in buying "${name}" (${t}) from FGS.Store. Please share details.`);
+  window.open(`https://wa.me/${WA}?text=${msg}`, "_blank");
+}
+
+// ── RENDER ──
+function makeCard(item, admin) {
+  const isFree = item.price === "Free";
+  const typeLabel = item.type === "design" ? "📐 Design" : `🧊 ${item.fileFormat || "Model"}`;
+  let actionBtn = "";
+  if (item.type === "design" || !isFree) {
+    actionBtn = `<button class="btn btn-wa" onclick="openWA('${esc(item.title)}','${item.type === 'design' ? 'Canva Design' : '3D Model'}')">💬 Buy on WhatsApp</button>`;
+  } else {
+    if (item.fileUrl) {
+      actionBtn = `<button class="btn btn-green" onclick="downloadFile('${item.id}')">⬇️ Free Download</button>`;
+    } else {
+      actionBtn = `<button class="btn btn-green" onclick="showToast('Demo file — upload a real file to enable download.','err')">⬇️ Free Download</button>`;
+    }
+  }
+  const delBtn = admin ? `<button class="btn btn-red" onclick="deleteItem('${item.id}')" title="Delete">🗑️</button>` : "";
+  return `
+    <div class="card">
+      <div class="card-img-wrap">
+        <img class="card-img" src="${item.img}" alt="${esc(item.title)}" loading="lazy" />
+        <div class="card-badges">
+          <span class="badge ${isFree ? 'badge-free':'badge-paid'}">${isFree?'FREE':'PAID'}</span>
+          <span class="badge badge-type">${typeLabel}</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-cat">${esc(item.category).toUpperCase()}</div>
+        <div class="card-title">${esc(item.title)}</div>
+        <div class="card-desc">${esc(item.description)}</div>
+        <div class="card-actions">${actionBtn}${delBtn}</div>
+      </div>
+    </div>`;
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderHome() {
+  const designs = items.filter(i=>i.type==='design');
+  const models = items.filter(i=>i.type==='model');
+  document.getElementById('stat-designs').textContent = designs.length;
+  document.getElementById('stat-models').textContent = models.length;
+  document.getElementById('stat-free').textContent = models.filter(m=>m.price==='Free').length;
+  const featured = items.slice(0,3);
+  document.getElementById('featured-grid').innerHTML = featured.length ? featured.map(i=>makeCard(i,false)).join('') : '<div class="empty-state">No items yet.</div>';
+}
+
+function renderDesigns() {
+  const q = (document.getElementById('search-designs').value||'').toLowerCase();
+  const list = items.filter(i=>i.type==='design' && (!q || i.title.toLowerCase().includes(q)||i.category.toLowerCase().includes(q)||i.description.toLowerCase().includes(q)));
+  document.getElementById('designs-grid').innerHTML = list.length ? list.map(i=>makeCard(i,adminLoggedIn)).join('') : '<div class="empty-state">No designs found.</div>';
+}
+
+function renderModels() {
+  const q = (document.getElementById('search-models').value||'').toLowerCase();
+  const list = items.filter(i=>i.type==='model' && (!q || i.title.toLowerCase().includes(q)||i.category.toLowerCase().includes(q)||i.description.toLowerCase().includes(q)));
+  document.getElementById('models-grid').innerHTML = list.length ? list.map(i=>makeCard(i,adminLoggedIn)).join('') : '<div class="empty-state">No models found.</div>';
+}
+
+function downloadFile(id) {
+  const item = items.find(i=>i.id===id);
+  if (!item || !item.fileUrl) { showToast('File not available.','err'); return; }
+  const a = document.createElement('a');
+  a.href = item.fileUrl; a.download = item.fileName || item.title;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function deleteItem(id) {
+  items = items.filter(i=>i.id!==id);
+  saveItems(); renderHome(); renderDesigns(); renderModels();
+  showToast('🗑️ Item deleted.','err');
+}
+
+// ── ADMIN ──
+function openAdmin() {
+  document.getElementById('adminPwd').value=''; document.getElementById('loginErr').textContent='';
+  document.getElementById('admin-login').style.display = adminLoggedIn ? 'none':'block';
+  document.getElementById('admin-panel').style.display = adminLoggedIn ? 'block':'none';
+  document.getElementById('adminOverlay').classList.add('show');
+}
+function closeOverlay(id) { document.getElementById(id).classList.remove('show'); }
+
+function doLogin() {
+  if (document.getElementById('adminPwd').value === PWD) {
+    adminLoggedIn = true;
+    document.getElementById('admin-login').style.display='none';
+    document.getElementById('admin-panel').style.display='block';
+    document.getElementById('loginErr').textContent='';
+  } else {
+    document.getElementById('loginErr').textContent='❌ Wrong password!';
+  }
+}
+function doLogout() {
+  adminLoggedIn = false; closeOverlay('adminOverlay');
+  renderDesigns(); renderModels();
+}
+
+// ── UPLOAD ──
+function openUpload(type) {
+  closeOverlay('adminOverlay');
+  currentUploadType = type;
+  currentPrice = type === 'model' ? 'Free' : 'Paid';
+  imgDataUrl = null; fileBlob = null; fileName = "";
+  document.getElementById('imgZone').innerHTML='<div id="imgPlaceholder">📷 Click to upload image</div>';
+  document.getElementById('fileZone').innerHTML='<div id="filePlaceholder">📦 Click to upload model file</div>';
+  document.getElementById('up-title').value='';
+  document.getElementById('up-cat').value='';
+  document.getElementById('up-desc').value='';
+  document.getElementById('uploadErr').textContent='';
+  document.getElementById('upload-title').textContent = type==='design' ? '📐 Upload New Design' : '🧊 Upload 3D Model';
+  document.getElementById('price-row').style.display = type==='model'?'block':'none';
+  document.getElementById('info-design').style.display = type==='design'?'block':'none';
+  document.getElementById('info-paid').style.display='none';
+  document.getElementById('file-row').style.display = (type==='model' && currentPrice==='Free') ? 'block':'none';
+  setPrice(currentPrice);
+  document.getElementById('uploadOverlay').classList.add('show');
+}
+
+function setPrice(p) {
+  currentPrice = p;
+  document.getElementById('btn-free').className = 'type-btn' + (p==='Free'?' sel-free':'');
+  document.getElementById('btn-paid').className = 'type-btn' + (p==='Paid'?' sel-paid':'');
+  document.getElementById('file-row').style.display = (currentUploadType==='model' && p==='Free') ? 'block':'none';
+  document.getElementById('info-paid').style.display = (currentUploadType==='model' && p==='Paid') ? 'block':'none';
+}
+
+function handleImg(input) {
+  const file = input.files[0]; if(!file) return;
+  if (!['image/png','image/jpeg'].includes(file.type)) { showUploadErr('Only .png or .jpg allowed!'); return; }
+  const r = new FileReader();
+  r.onload = e => {
+    imgDataUrl = e.target.result;
+    document.getElementById('imgZone').innerHTML = `<img src="${imgDataUrl}" style="width:100%;max-height:140px;object-fit:cover;border-radius:7px" />`;
+  };
+  r.readAsDataURL(file);
+}
+
+function handleFile(input) {
+  const file = input.files[0]; if(!file) return;
+  const n = file.name.toLowerCase();
+  if (!n.endsWith('.fbx') && !n.endsWith('.glb') && !n.endsWith('.zip')) { showUploadErr('Only .fbx, .glb, .zip allowed!'); return; }
+  fileBlob = file; fileName = file.name;
+  document.getElementById('fileZone').innerHTML = `<span style="color:#00cc00">✅ ${file.name}</span>`;
+}
+
+function showUploadErr(msg) { document.getElementById('uploadErr').textContent = '⚠️ ' + msg; }
+
+function doPublish() {
+  const title = document.getElementById('up-title').value.trim();
+  const cat = document.getElementById('up-cat').value.trim();
+  const desc = document.getElementById('up-desc').value.trim();
+  if (!title) { showUploadErr('Title is required!'); return; }
+  if (!cat) { showUploadErr('Category is required!'); return; }
+  if (!desc) { showUploadErr('Description is required!'); return; }
+  if (!imgDataUrl) { showUploadErr('Preview image is required!'); return; }
+  if (currentUploadType==='model' && currentPrice==='Free' && !fileBlob) { showUploadErr('Please upload the model file!'); return; }
+
+  const ext = fileBlob ? ('.' + fileBlob.name.split('.').pop()) : '';
+  const newItem = {
+    id: Date.now().toString(),
+    type: currentUploadType,
+    title, category: cat, description: desc,
+    price: currentUploadType==='design' ? 'Paid' : currentPrice,
+    img: imgDataUrl,
+    fileUrl: fileBlob ? URL.createObjectURL(fileBlob) : null,
+    fileFormat: ext, fileName: fileName,
+  };
+  items.unshift(newItem);
+  saveItems();
+  closeOverlay('uploadOverlay');
+  renderHome(); renderDesigns(); renderModels();
+  showToast(`✅ "${title}" published!`);
+}
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = type==='err' ? 'err-toast' : '';
+  el.style.display='block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ el.style.display='none'; }, 2800);
+}
+
+// ── INIT ──
+loadItems();
+renderHome();
+</script>
+</body>
+</html>
